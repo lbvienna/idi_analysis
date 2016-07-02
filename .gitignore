@@ -90,3 +90,5 @@ ENV/
 
 # Datastorage
 *.sav
+
+*.DS_Store
