@@ -92,4 +92,4 @@ ENV/
 *.sav
 
 *.DS_Store
-*/index.json
+conf/index.json
