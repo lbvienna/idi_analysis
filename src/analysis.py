@@ -20,27 +20,28 @@ def main(filename):
 	data = utilities.convert_numeric(data)
 	numeric_start = 4
 	basic_questions_end = 13
-	numerics = np.asarray(data[:,numeric_start:basic_questions_end], dtype=np.float32)
+	numerics = np.asarray(data[:,numeric_start:], dtype=np.float32)
 	meta_data = np.asarray(data[:,:numeric_start])
-	pca(numerics, meta_data, "age", n_components=2)
+	pca(numerics, n_components=2)
 	#k_means(numerics)
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
 	print s
 
-def pca(data, meta_data, meta_datatype, n_components=2):
+def pca(data, meta_data=None, meta_datatype=None, n_components=2):
 	svd(data)
 	pca = decomposition.PCA(n_components=n_components)
 	pca.fit(data)
 	X = pca.transform(data)
 	if n_components == 2:
-		for i, (x_i, y_i) in enumerate(zip(X[:, 0], X[:, 1])):
-			c = utilities.get_color(i, meta_datatype, meta_data)
-			plt.scatter(x_i, y_i, color=c)
-
-		#plt.scatter(X[:, 0], X[:, 1])
-		plt.show()
+		if meta_data is not None:
+			for i, (x_i, y_i) in enumerate(zip(X[:, 0], X[:, 1])):
+				c = utilities.get_color(i, meta_datatype, meta_data)
+				plt.scatter(x_i, y_i, color=c)
+		else:
+			plt.scatter(X[:, 0], X[:, 1])
+			plt.show()
 	else:
 		trace1 = go.Scatter3d(
 		    x=X[:, 0],
