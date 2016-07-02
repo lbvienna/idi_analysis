@@ -21,24 +21,27 @@ def main(filename):
 	numeric_start = 4
 	basic_questions_end = 13
 	numerics = np.asarray(data[:,numeric_start:basic_questions_end], dtype=np.float32)
-	#svd(numerics)
-	pca(numerics, n_components=3)
+	meta_data = np.asarray(data[:,:numeric_start])
+	pca(numerics, meta_data, "age", n_components=2)
 	#k_means(numerics)
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
 	print s
 
-def pca(data, n_components=2):
+def pca(data, meta_data, meta_datatype, n_components=2):
+	svd(data)
 	pca = decomposition.PCA(n_components=n_components)
 	pca.fit(data)
 	X = pca.transform(data)
 	if n_components == 2:
-		plt.scatter(X[:, 0], X[:, 1])
+		for i, (x_i, y_i) in enumerate(zip(X[:, 0], X[:, 1])):
+			c = utilities.get_color(i, meta_datatype, meta_data)
+			plt.scatter(x_i, y_i, color=c)
+
+		#plt.scatter(X[:, 0], X[:, 1])
 		plt.show()
 	else:
-		# doesn't work. some really strange bug
-
 		trace1 = go.Scatter3d(
 		    x=X[:, 0],
 		    y=X[:, 1],
@@ -63,7 +66,7 @@ def pca(data, n_components=2):
     		)
 		)
 		fig = go.Figure(data=data, layout=layout)
-		py.iplot(fig, filename='simple-3d-scatter')
+		py.iplot(fig, filename='3dpca_small')
 
 def k_means(data, K=range(1,10)):
 	if type(K) is list:

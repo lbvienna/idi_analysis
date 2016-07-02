@@ -30,3 +30,49 @@ def convert_numeric(data):
 
 def plotly_login(username, api_key):
 	plotly.tools.set_credentials_file(username=username, api_key=api_key)
+
+def get_color(i, meta_data_type, meta_data):
+	if meta_data_type == "location":
+		return get_color_place(i, meta_data[:,1])
+	if meta_data_type == "gender":
+		return get_color_gender(i, meta_data[:,2])
+	if meta_data_type == "age":
+		return get_color_age(i, meta_data[:,3])
+
+def get_color_place(i, places):
+	place = places[i]
+	if place == "Jerusalem":
+		return "blue"
+	if place == "Tel Aviv":
+		return "red"
+	if place == "North":
+		return "green"
+	if place == "South":
+		return "cyan"
+	if place == "Haifa":
+		return "magenta"
+	if place == "Judea and Samaria":
+		return "yellow"
+	if place == "Center":
+		return "black"
+
+def get_color_gender(i, genders):
+	gender = genders[i]
+	if gender == "male":
+		return "blue"
+	return "red"
+
+def get_color_age(i, ages):
+	age = ages[i]
+	if age == "18-24":
+		return "blue"
+	if age == "25-34":
+		return "red"
+	if age == "35-44":
+		return "green"
+	if age == "45-54":
+		return "cyan"
+	if age == "55-64":
+		return "magenta"
+	if age == "65+":
+		return "yellow"
