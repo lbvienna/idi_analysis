@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import plotly
 
 def read_csv(file_, sep=','):
 	data = []
@@ -26,3 +27,6 @@ def convert_numeric(data):
 			new_row.append(new_x_ij)
 		new_data.append(new_row)
 	return np.asarray(new_data)
+
+def plotly_login(username, api_key):
+	plotly.tools.set_credentials_file(username=username, api_key=api_key)

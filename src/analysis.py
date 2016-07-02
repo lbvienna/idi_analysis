@@ -1,5 +1,8 @@
-from utilities import *
+from utils import utilities, config
 
+import argparse
+
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from sklearn import decomposition
@@ -7,15 +10,20 @@ from sklearn import decomposition
 from scipy.cluster.vq import kmeans,vq
 from scipy.spatial.distance import cdist
 
+import plotly.plotly as py
+import plotly.graph_objs as go
+
 
 
 def main(filename):
-	data = read_csv(filename)
-	data = convert_numeric(data)
-	numerics = np.asarray(data[:,4:], dtype=np.float32)
+	data = utilities.read_csv(filename)
+	data = utilities.convert_numeric(data)
+	numeric_start = 4
+	basic_questions_end = 13
+	numerics = np.asarray(data[:,numeric_start:basic_questions_end], dtype=np.float32)
 	#svd(numerics)
-	#pca(numerics, n_components=2)
-	k_means(numerics)
+	pca(numerics, n_components=3)
+	#k_means(numerics)
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
@@ -30,12 +38,34 @@ def pca(data, n_components=2):
 		plt.show()
 	else:
 		# doesn't work. some really strange bug
-		fig = plt.figure()
-		ax = fig.add_subplot(111, projection='3d')
-		ax.scatter(X[:, 0], X[:, 1], X[:, 2])
-		ax.show()
 
-def k_means(data, K=range(1,100)):
+		trace1 = go.Scatter3d(
+		    x=X[:, 0],
+		    y=X[:, 1],
+		    z=X[:, 2],
+		    mode='markers',
+		    marker=dict(
+		        size=12,
+		        line=dict(
+		            color='rgba(217, 217, 217, 0.14)',
+		            width=0.5
+		        ),
+		        opacity=0.8
+		    )
+		)
+		data = [trace1]
+		layout = go.Layout(
+    		margin=dict(
+        	l=0,
+        	r=0,
+        	b=0,
+        	t=0
+    		)
+		)
+		fig = go.Figure(data=data, layout=layout)
+		py.iplot(fig, filename='simple-3d-scatter')
+
+def k_means(data, K=range(1,10)):
 	if type(K) is list:
 		KM = [kmeans(data,k) for k in K]
 		centroids = [cent for (cent,var) in KM]
@@ -65,5 +95,18 @@ def k_means(data, K=range(1,100)):
 		D_k = cdist(data, centroids, 'euclidean')
 
 if __name__ == '__main__':
-	filename = "data/idi_data.csv"
-	main(filename)
+	parser = argparse.ArgumentParser()
+	parser.add_argument('-c', dest='config_file', default='conf/index.json', help='use specified config file')
+	args = parser.parse_args()
+	config = config.Config(args.config_file)
+
+	utilities.plotly_login(config.plotly_username, config.plotly_api_key)
+
+	main(config.data_filename)
+
+
+
+
+
+
+
