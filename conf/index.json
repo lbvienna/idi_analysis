@@ -1,8 +1,8 @@
 {
 	"config": {
 		"plotly": {
-			"username": "",
-			"api_key": "" 
+			"username": "lbronner",
+			"api_key": "ts0t9lghc9"
 		},
 		"data_filename": "data/idi_data.csv"
 	}
