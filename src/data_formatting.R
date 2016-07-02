@@ -1,7 +1,6 @@
 library(foreign)
-library(rjson)
 
-filename = "Democracy-Index-2014-English-for-website.sav"
+filename = "../data/Democracy-Index-2014-English-for-website.sav"
 dataset = read.spss(filename, to.data.frame=TRUE)
 
 encode = function(vec) {
@@ -16,7 +15,15 @@ encode = function(vec) {
     if (i == num_poss_responses) {
       response_to_num[[i]] = NA
     } else {
-      response_to_num[[i]] = max - i
+      ins = max - i
+      if (num_poss_responses %% 2 == 0) {
+        response_to_num[[i]] = ins
+      } else {
+        if (ins >= 0) {
+          ins = ins + 1
+        }
+        response_to_num[[i]] = ins
+      }
     }
   }
   for (i in 1:num_responses) {
@@ -47,7 +54,7 @@ new_dataframe$Q9_7 = unlist(encode(dataset$Q9_7))
 new_dataframe$Q9_8 = unlist(encode(dataset$Q9_8))
 new_dataframe$Q9_9 = unlist(encode(dataset$Q9_9))
 new_dataframe$Q9_10 = unlist(encode(dataset$Q9_10))
-new_dataframe$Q10 = unlist(encode(dataset$Q10))
+#new_dataframe$Q10 = unlist(encode(dataset$Q10))
 #new_dataframe$Q15 = dataset$Q15
 #new_dataframe$Q16 = dataset$Q16
 new_dataframe$Q17 = unlist(encode(dataset$Q17))
