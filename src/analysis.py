@@ -6,8 +6,9 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from sklearn import decomposition
+from sklearn import manifold
 
-from scipy.cluster.vq import kmeans,vq
+from scipy.cluster.vq import kmeans,vq, whiten
 from scipy.spatial.distance import cdist
 
 import plotly.plotly as py
@@ -22,18 +23,33 @@ def main(filename):
 	basic_questions_end = 13
 	numerics = np.asarray(data[:,numeric_start:], dtype=np.float32)
 	meta_data = np.asarray(data[:,:numeric_start])
-	pca(numerics, n_components=2)
+	isomap(numerics, meta_data, "sex", n_components=2)
+	#t_sne(numerics, meta_data, "age", n_components=2)
+	#pca(numerics, n_components=2)
 	#k_means(numerics)
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
 	print s
 
+def t_sne(data, meta_data=None, meta_datatype=None, n_components=2):
+	tsne = manifold.TSNE(n_components=n_components)
+	X = tsne.fit_transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
+
+def isomap(data, meta_data=None, meta_datatype=None, n_components=2):
+	iso = manifold.Isomap(n_components=n_components)
+	X = iso.fit_transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
+
 def pca(data, meta_data=None, meta_datatype=None, n_components=2):
 	svd(data)
 	pca = decomposition.PCA(n_components=n_components)
 	pca.fit(data)
 	X = pca.transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
+
+def plot_dem_red(X, meta_data=None, meta_datatype=None, n_components=2):
 	if n_components == 2:
 		if meta_data is not None:
 			for i, (x_i, y_i) in enumerate(zip(X[:, 0], X[:, 1])):
@@ -41,7 +57,7 @@ def pca(data, meta_data=None, meta_datatype=None, n_components=2):
 				plt.scatter(x_i, y_i, color=c)
 		else:
 			plt.scatter(X[:, 0], X[:, 1])
-			plt.show()
+		plt.show()
 	else:
 		trace1 = go.Scatter3d(
 		    x=X[:, 0],
@@ -69,9 +85,9 @@ def pca(data, meta_data=None, meta_datatype=None, n_components=2):
 		fig = go.Figure(data=data, layout=layout)
 		py.iplot(fig, filename='3dpca_small')
 
-def k_means(data, K=range(1,10)):
+def k_means(data, K=range(1,20)):
 	if type(K) is list:
-		KM = [kmeans(data,k) for k in K]
+		KM = [kmeans(whiten(data),k) for k in K]
 		centroids = [cent for (cent,var) in KM]
 
 		D_k = [cdist(data, cent, 'euclidean') for cent in centroids]
@@ -79,7 +95,7 @@ def k_means(data, K=range(1,10)):
 		dist = [np.min(D,axis=1) for D in D_k]
 		avgWithinSS = [sum(d)/data.shape[0] for d in dist]
 		
-		kIdx = 2
+		kIdx = 3
 
 		fig = plt.figure()
 		ax = fig.add_subplot(111)

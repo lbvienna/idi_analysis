@@ -34,7 +34,7 @@ def plotly_login(username, api_key):
 def get_color(i, meta_data_type, meta_data):
 	if meta_data_type == "location":
 		return get_color_place(i, meta_data[:,1])
-	if meta_data_type == "gender":
+	if meta_data_type == "sex":
 		return get_color_gender(i, meta_data[:,2])
 	if meta_data_type == "age":
 		return get_color_age(i, meta_data[:,3])
