@@ -10,6 +10,7 @@ from sklearn import manifold
 
 from scipy.cluster.vq import kmeans,vq, whiten
 from scipy.spatial.distance import cdist
+from scipy.stats import pearsonr
 
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -23,14 +24,38 @@ def main(filename):
 	basic_questions_end = 13
 	numerics = np.asarray(data[:,numeric_start:], dtype=np.float32)
 	meta_data = np.asarray(data[:,:numeric_start])
-	isomap(numerics, meta_data, "sex", n_components=2)
+	svd(numerics)
+	correlations(numerics)
+	#lle(numerics, meta_data, "age", n_components=2)
+	#spectral_embedding(numerics, meta_data, "age", n_components=2)
+	#isomap(numerics, meta_data, "age", n_components=2)
 	#t_sne(numerics, meta_data, "age", n_components=2)
-	#pca(numerics, n_components=2)
+	#pca(numerics, meta_data, "age", n_components=2)
 	#k_means(numerics)
+
+def correlations(data):
+	for i in xrange(data.shape[1]):
+		for j in xrange(data.shape[1]):
+			if i > j:
+				x_i = data[:,i]
+				y_j = data[:,j]
+				pearson = pearsonr(x_i, y_j)[0]
+				if abs(pearson) > 0.4:
+					print i, j, pearsonr(x_i, y_j)[0]
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
 	print s
+
+def lle(data, meta_data=None, meta_datatype=None, n_components=2):
+	lle_ = manifold.LocallyLinearEmbedding(n_components=n_components)
+	X = lle_.fit_transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
+
+def spectral_embedding(data, meta_data=None, meta_datatype=None, n_components=2):
+	spec_embed = manifold.SpectralEmbedding(n_components=n_components, affinity='rbf')
+	X = spec_embed.fit_transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
 
 def t_sne(data, meta_data=None, meta_datatype=None, n_components=2):
 	tsne = manifold.TSNE(n_components=n_components)
@@ -43,7 +68,6 @@ def isomap(data, meta_data=None, meta_datatype=None, n_components=2):
 	plot_dem_red(X, meta_data, meta_datatype, n_components)
 
 def pca(data, meta_data=None, meta_datatype=None, n_components=2):
-	svd(data)
 	pca = decomposition.PCA(n_components=n_components)
 	pca.fit(data)
 	X = pca.transform(data)
@@ -59,21 +83,41 @@ def plot_dem_red(X, meta_data=None, meta_datatype=None, n_components=2):
 			plt.scatter(X[:, 0], X[:, 1])
 		plt.show()
 	else:
-		trace1 = go.Scatter3d(
-		    x=X[:, 0],
-		    y=X[:, 1],
-		    z=X[:, 2],
-		    mode='markers',
-		    marker=dict(
-		        size=12,
-		        line=dict(
-		            color='rgba(217, 217, 217, 0.14)',
-		            width=0.5
-		        ),
-		        opacity=0.8
-		    )
-		)
-		data = [trace1]
+		if meta_data is not None:
+			data = []
+			for i, (x_i, y_i, z_i) in enumerate(zip(X[:, 0], X[:, 1], X[:, 2])):
+				c = utilities.get_color(i, meta_datatype, meta_data)
+				trace_i = go.Scatter3d(
+					x=x_i,
+					y=y_i,
+					z=z_i,
+					mode='markers',
+					marker=dict(
+						size=12,
+						line=dict(
+							color=c,
+							width=0.5
+						),
+						opacity=0.8
+					)
+				)
+				data.append(trace_i)
+		else:
+			trace1 = go.Scatter3d(
+			    x=X[:, 0],
+			    y=X[:, 1],
+			    z=X[:, 2],
+			    mode='markers',
+			    marker=dict(
+			        size=12,
+			        line=dict(
+			            color='rgba(217, 217, 217, 0.14)',
+			            width=0.5
+			        ),
+			        opacity=0.8
+			    )
+			)
+			data = [trace1]
 		layout = go.Layout(
     		margin=dict(
         	l=0,
@@ -82,8 +126,8 @@ def plot_dem_red(X, meta_data=None, meta_datatype=None, n_components=2):
         	t=0
     		)
 		)
-		fig = go.Figure(data=data, layout=layout)
-		py.iplot(fig, filename='3dpca_small')
+		fig = go.Figure(data=data, layout=layout) #uses python specific hack that data is always declared out of scope
+		py.iplot(fig, filename='3dlle_small_location')
 
 def k_means(data, K=range(1,20)):
 	if type(K) is list:

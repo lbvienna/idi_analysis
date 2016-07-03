@@ -118,3 +118,22 @@ new_dataframe$Q27_2 = unlist(encode(dataset$Q27_2))
 
 write.csv(new_dataframe, file="../data/idi_data.csv")
 
+
+smaller_dataframe = data.frame(Location=dataset$C1)
+smaller_dataframe$Sex = dataset$Q1c
+smaller_dataframe$Age = dataset$Q2c
+
+smaller_dataframe$Q1 = unlist(encode(dataset$Q1))
+smaller_dataframe$Q2 = unlist(encode(dataset$Q2))
+smaller_dataframe$Q3 = unlist(encode(dataset$Q3))
+smaller_dataframe$Q4 = unlist(encode(dataset$Q4))
+smaller_dataframe$Q5 = unlist(encode(dataset$Q5))
+smaller_dataframe$Q8 = unlist(encode(dataset$Q8))
+smaller_dataframe$Q10 = unlist(encode_jewish(dataset$Q10))
+smaller_dataframe$Q18 = unlist(encode(dataset$Q18))
+smaller_dataframe$Q19 = unlist(encode(dataset$Q19))
+smaller_dataframe$Q20 = unlist(encode(dataset$Q20))
+smaller_dataframe$Q21 = unlist(encode(dataset$Q21))
+
+write.csv(smaller_dataframe, file="../data/idi_data_smaller.csv")
+
