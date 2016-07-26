@@ -24,14 +24,15 @@ def main(filename):
 	basic_questions_end = 13
 	numerics = np.asarray(data[:,numeric_start:], dtype=np.float32)
 	meta_data = np.asarray(data[:,:numeric_start])
-	svd(numerics)
-	correlations(numerics)
+	#svd(numerics)
+	#correlations(numerics)
 	#lle(numerics, meta_data, "age", n_components=2)
 	#spectral_embedding(numerics, meta_data, "age", n_components=2)
 	#isomap(numerics, meta_data, "age", n_components=2)
 	#t_sne(numerics, meta_data, "age", n_components=2)
-	#pca(numerics, meta_data, "age", n_components=2)
+	ica(numerics, n_components=2)
 	#k_means(numerics)
+	#correlations(numerics)
 
 def correlations(data):
 	for i in xrange(data.shape[1]):
@@ -41,7 +42,9 @@ def correlations(data):
 				y_j = data[:,j]
 				pearson = pearsonr(x_i, y_j)[0]
 				if abs(pearson) > 0.4:
-					print i, j, pearsonr(x_i, y_j)[0]
+					print i, j, pearson
+					plt.scatter(x_i, y_j)
+					plt.show()
 
 def svd(data):
 	U, s, V = np.linalg.svd(data, full_matrices=True)
@@ -69,8 +72,12 @@ def isomap(data, meta_data=None, meta_datatype=None, n_components=2):
 
 def pca(data, meta_data=None, meta_datatype=None, n_components=2):
 	pca = decomposition.PCA(n_components=n_components)
-	pca.fit(data)
-	X = pca.transform(data)
+	X = pca.fit_transform(data)
+	plot_dem_red(X, meta_data, meta_datatype, n_components)
+
+def ica(data, meta_data=None, meta_datatype=None, n_components=2):
+	ica = decomposition.FastICA(n_components=n_components)
+	X = ica.fit_transform(data)
 	plot_dem_red(X, meta_data, meta_datatype, n_components)
 
 def plot_dem_red(X, meta_data=None, meta_datatype=None, n_components=2):
@@ -157,6 +164,8 @@ def k_means(data, K=range(1,20)):
 		centroids, var = KM
 
 		D_k = cdist(data, centroids, 'euclidean')
+
+		#finish implementation
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
